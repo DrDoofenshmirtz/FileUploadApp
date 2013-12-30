@@ -1,0 +1,29 @@
+body {
+  width: 100%;
+  height: 100%;
+  background-color: LightGray;
+}
+
+.contentFrame {
+  display: inline-block;
+  position: relative;
+  top: 30px;
+  left: 5px;
+  border: solid 1px gray;
+  border-radius: 4px 4px 4px 4px;
+  padding: 12px 5px 5px 5px;
+  white-space: nowrap;
+  background-color: SkyBlue;
+}
+
+.titleBar {
+  display: inline-block;
+  position: absolute;
+  top: -1em;
+  left: 0.25em;
+  border: solid 1px gray;
+  border-radius: 4px 4px 4px 4px;
+  padding: 2px 4px 2px 4px;
+  background-color: AliceBlue;
+}
+

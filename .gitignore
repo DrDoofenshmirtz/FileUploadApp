@@ -1,0 +1,6 @@
+/lib/**
+/out/**
+/classes/**
+*.class
+*.jar
+*~
