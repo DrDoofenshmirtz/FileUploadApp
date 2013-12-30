@@ -4,7 +4,7 @@ body {
   background-color: LightGray;
 }
 
-.contentFrame {
+.fuapp-content-frame {
   display: inline-block;
   position: relative;
   top: 30px;
@@ -16,7 +16,7 @@ body {
   background-color: SkyBlue;
 }
 
-.titleBar {
+.fuapp-title-bar {
   display: inline-block;
   position: absolute;
   top: -1em;
