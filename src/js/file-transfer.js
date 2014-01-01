@@ -175,6 +175,7 @@
       
       if (!sliceSent) {
         log('Upload of file "' + file.name + '" aborted.');
+        eventHandler.onAbort();
         
         return;
       }
