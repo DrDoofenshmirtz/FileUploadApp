@@ -7,9 +7,11 @@
       slice.next();
     }        
   };  
+
   var defaultOnError = function(error) {
     global.console.log('onError: ' + error);
   };      
+
   var slice = function(file, options) {
     var onSlice,
         onError,
@@ -19,6 +21,7 @@
         sliceCount, 
         reader, 
         position,
+        aborted,
         readNextSlice;
     
     try {
@@ -38,7 +41,13 @@
     reader = new FileReader();
     position = 0;
     readNextSlice = function() {
-      var start = position;
+      var start;
+      
+      if (aborted) {
+        return;
+      }
+      
+      start = position;
       
       if (start >= fileSize) {
         onSlice({endOfFile: true});
@@ -95,14 +104,13 @@
     readNextSlice();
     
     return (function() {
-      var ignoreEvent = function() {},
-          aborted = false;
+      var doNothing = function() {};
           
       return function() {
         if (!aborted) {
           aborted = true;
-          onSlice = ignoreEvent;
-          onError = ignoreEvent;
+          onSlice = doNothing;
+          onError = doNothing;
           
           try {
             reader.abort();
