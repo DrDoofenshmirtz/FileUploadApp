@@ -1,7 +1,5 @@
 (function(global, $) {
-  var makeCommand;
- 
-  makeCommand = function(channelConstructor) {
+  var makeCommand = function(channelConstructor) {
     var text,
         progress,
         enabled,
@@ -46,7 +44,12 @@
       channel = channelConstructor();
       eventHandler = {
         onProgress: function(sliceIndex, sliceCount) {
-          progress = ((sliceIndex + 1) / sliceCount);
+          if (sliceCount <= 0) {
+            progress = 1;
+          } else {
+            progress = Math.min(1, ((sliceIndex + 1) / sliceCount));
+          }
+          
           fireStateChanged();
         },
         onError: reset,

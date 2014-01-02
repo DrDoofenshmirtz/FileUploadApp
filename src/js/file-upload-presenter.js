@@ -26,7 +26,7 @@
       widgets.progressBar.prop('value', 0);
     } else {
       widgets.progressBar.show();
-      widgets.progressBar.prop('value', Math.min(1.0, progress));
+      widgets.progressBar.prop('value', Math.min(1, progress));
     }
   };    
       
