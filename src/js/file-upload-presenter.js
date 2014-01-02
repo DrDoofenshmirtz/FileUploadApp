@@ -9,14 +9,25 @@
     
     widgets.fileSelection = $('#fuapp-file-selection');
     widgets.button = $('#fuapp-upload-button');
+    widgets.progressBar = $('#fuapp-progress-bar');
     
     return widgets;
   };    
       
   updateView = function(command, widgets) {
+    var progress = command.getProgress();
+    
     widgets.button.text(command.getText());
     widgets.button.prop('disabled', command.isExecutable() ? false : true);
     widgets.fileSelection.prop('disabled', command.isBusy() ? true : false);
+    
+    if (progress < 0) {
+      widgets.progressBar.hide();
+      widgets.progressBar.prop('value', 0);
+    } else {
+      widgets.progressBar.show();
+      widgets.progressBar.prop('value', Math.min(1.0, progress));
+    }
   };    
       
   attach = function(command, widgets) {

@@ -27,3 +27,8 @@ body {
   background-color: AliceBlue;
 }
 
+.fuapp-progress-bar {
+  margin-top: 10px;
+  width: 100%;
+}
+
