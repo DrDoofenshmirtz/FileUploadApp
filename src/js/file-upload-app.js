@@ -31,7 +31,8 @@
   uploadCommand = $.fm.fuapp.makeCommand(channelConstructor);
   
   $(function() {
-    $.fm.fuapp.installPresenter(uploadCommand);            
+    $.fm.fuapp.installPresenter($('.fuapp-view').first(), uploadCommand);            
+    
     client.open();          
   }); 
 })(this, (this.jQuery || this));

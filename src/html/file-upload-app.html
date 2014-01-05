@@ -17,19 +17,18 @@
     <script src="js/file-upload-app.js"></script>
   </head>
   <body>
-    <div class="fuapp-content-frame">
+    <div class="fuapp-view">
       <div class="fuapp-title-bar">
         File Upload
       </div>
       <div>
         <span>
           Please select a file to upload:
-          <input type="file" id="fuapp-file-selection" />
-          <button id="fuapp-upload-button">Upload</button>
+          <input type="file" class="fuapp-file-selection" />
+          <button class="fuapp-upload-button">Upload</button>
         </span>
       </div>
-      <progress id="fuapp-progress-bar" class="fuapp-progress-bar" max="1.0">
-      </progress>
+      <progress class="fuapp-progress-bar" max="1.0"></progress>
     </div>   
   </body>
 </html>

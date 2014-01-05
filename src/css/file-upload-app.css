@@ -4,7 +4,7 @@ body {
   background-color: LightGray;
 }
 
-.fuapp-content-frame {
+.fuapp-view {
   display: inline-block;
   position: relative;
   top: 30px;

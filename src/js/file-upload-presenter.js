@@ -4,12 +4,12 @@
       attach,
       install;    
 
-  findWidgets = function() {
+  findWidgets = function(parent) {
     var widgets = {};
     
-    widgets.fileSelection = $('#fuapp-file-selection');
-    widgets.button = $('#fuapp-upload-button');
-    widgets.progressBar = $('#fuapp-progress-bar');
+    widgets.fileSelection = parent.find('.fuapp-file-selection').first();
+    widgets.button = parent.find('.fuapp-upload-button').first();
+    widgets.progressBar = parent.find('.fuapp-progress-bar').first();
     
     return widgets;
   };    
@@ -46,10 +46,16 @@
     };
   };
       
-  install = function(command) {
-    var widgets = findWidgets();
+  install = function(parent, command) {
+    if (!parent) {
+      $.fm.core.raise('ArgumentError', 'Illegal value for "parent"!');
+    }
     
-    return attach(command, widgets);
+    if (!command) {
+      $.fm.core.raise('ArgumentError', 'Illegal value for "command"!');
+    }
+    
+    return attach(command, findWidgets($(parent)));
   };
   
   $.fm.core.ns('fm.fuapp').installPresenter = install;
