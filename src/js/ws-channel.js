@@ -1,24 +1,30 @@
 (function(global, $) {
+  var ChannelState = {
+    NONE:   'NONE',
+    OPENED: 'OPENED',
+    READY:  'READY',
+    CLOSED: 'CLOSED'
+  };
+      
   var makeChannel = function(request) {
     var channelId,
         pendingClose,
         channel = {},
-        closed = true;      
- 
-    var ensureChannelIsClosed = function() {
-      if (!closed) {
-        $.fm.core.raise('ChannelError', 'Channel is open!');
+        state = ChannelState.NONE;      
+    
+    var stateIsIn = function() {
+      var acceptedStates = Array.prototype.slice.call(arguments);
+      
+      return (acceptedStates.indexOf(state) !== -1);
+    };
+        
+    var ensureStateIsIn = function() {
+      if (!stateIsIn.apply(undefined, arguments)) {
+        $.fm.core.raise('ChannelError', 
+                        'Illegal channel state: "' + state + '"!');
       }
     };
     
-    var isReady = function() { return (!closed && channelId); };
-    
-    var ensureChannelIsReady = function() {
-      if (!isReady()) {
-        $.fm.core.raise('ChannelError', 'Channel is not ready!');
-      }
-    };
-
     var dissectArguments = function(args) {
       var args = Array.prototype.slice.call(args),
           responseHandler = args.pop();
@@ -44,46 +50,11 @@
       }
     };
     
-    channel.open = function() {
-      var argsAndResponseHandler,
-          args,
-          responseHandler;
-      
-      ensureChannelIsClosed();
-      argsAndResponseHandler = dissectArguments(arguments);
-      args = argsAndResponseHandler[0];
-      responseHandler = argsAndResponseHandler[1];
-      args.unshift('open');
-      args.push({
-        onSuccess: function(result) {
-          channelId = result;
-          
-          if (transmitPendingClose()) {
-            responseHandler.dispose && responseHandler.dispose();    
-          } else {
-            responseHandler.onSuccess(true);
-          }
-        },
-        onFailure: function(error) {
-          closed = true;
-          pendingClose = undefined;
-          responseHandler.onFailure(error);  
-        },  
-        dispose: function() {
-          closed = true;
-          pendingClose = undefined;
-          responseHandler.dispose && responseHandler.dispose();
-        }
-      });
-      closed = false;
-      request.apply(this, args);
-    };
-    
     var transmitData = function(operation, args) {
       var argsAndResponseHandler,
           responseHandler;
             
-      ensureChannelIsReady();
+      ensureStateIsIn(ChannelState.READY);
       argsAndResponseHandler = dissectArguments(args);
       args = argsAndResponseHandler[0];
       responseHandler = argsAndResponseHandler[1];
@@ -93,7 +64,7 @@
         onSuccess: function(result) { responseHandler.onSuccess(result); },
         onFailure: function(error) { responseHandler.onFailure(error); },
         dispose: function() {
-          closed = true;
+          state = ChannelState.CLOSED;
           channelId = undefined;
           responseHandler.dispose && responseHandler.dispose(); 
         }
@@ -101,10 +72,6 @@
       request.apply(this, args);
     };
     
-    channel.read = function() { transmitData('read', arguments); };
-    
-    channel.write = function() { transmitData('write', arguments); };
-
     var transmitClose = function(operation, args) {
       var argsAndResponseHandler,
           responseHandler;
@@ -121,17 +88,17 @@
           responseHandler.dispose && responseHandler.dispose(); 
         }
       });
-      closed = true;
+      state = ChannelState.CLOSED;
       channelId = undefined;
       request.apply(this, args);
     };
     
     var closeChannel = function(operation, args) {
-      if (closed) {
+      if (stateIsIn(ChannelState.NONE, ChannelState.CLOSED)) {
         return false;
       }
       
-      if (channelId) {
+      if (stateIsIn(ChannelState.READY)) {
         transmitClose(operation, args);
       } else {
         pendingClose = function() { transmitClose(operation, args); };
@@ -140,8 +107,53 @@
       return true;
     };
     
-    channel.abort = function() { return closeChannel('abort', arguments); };
-    
+    channel.open = function() {
+      var argsAndResponseHandler,
+          args,
+          responseHandler;
+      
+      ensureStateIsIn(ChannelState.NONE, 
+                      ChannelState.OPENED, 
+                      ChannelState.READY);
+      
+      if (stateIsIn(ChannelState.OPENED, ChannelState.READY)) {
+        return false;
+      }
+      
+      argsAndResponseHandler = dissectArguments(arguments);
+      args = argsAndResponseHandler[0];
+      responseHandler = argsAndResponseHandler[1];
+      args.unshift('open');
+      args.push({
+        onSuccess: function(result) {
+          channelId = result;
+          state = ChannelState.READY;
+          
+          if (transmitPendingClose()) {
+            responseHandler.dispose && responseHandler.dispose();    
+          } else {
+            responseHandler.onSuccess(true);
+          }
+        },
+        onFailure: function(error) {
+          state = ChannelState.NONE;
+          pendingClose = undefined;
+          responseHandler.onFailure(error);  
+        },  
+        dispose: function() {
+          state = ChannelState.CLOSED;
+          pendingClose = undefined;
+          responseHandler.dispose && responseHandler.dispose();
+        }
+      });
+      state = ChannelState.OPENED;
+      request.apply(this, args);
+      
+      return true;
+    };
+    channel.read = function() { transmitData('read', arguments); };
+    channel.write = function() { transmitData('write', arguments); };
+    channel.abort = function() { return closeChannel('abort', arguments); };    
     channel.close = function() { return closeChannel('close', arguments); };
     
     return channel;
